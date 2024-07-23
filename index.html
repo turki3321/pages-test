@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>موقع الذكاء الاصطناعي للإجابة على الأسئلة</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>مرحبا بكم في موقع الذكاء الاصطناعي</h1>
+        <p>اطرح سؤالك أدناه واحصل على الإجابة:</p>
+        <textarea id="question" placeholder="اكتب سؤالك هنا..."></textarea>
+        <button onclick="getAnswer()">أرسل</button>
+        <div id="response"></div>
+    </div>
+    <script>
+        async function getAnswer() {
+            const question = document.getElementById('question').value;
+            const responseDiv = document.getElementById('response');
+
+            if (!question) {
+                alert('يرجى إدخال سؤال');
+                return;
+            }
+
+            responseDiv.style.display = 'none';
+            responseDiv.innerHTML = 'جارٍ التحميل...';
+            responseDiv.style.display = 'block';
+
+            try {
+                const response = await fetch('https://api.openai.com/v1/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer sk-svcacct-oBnW3q3seME7i09mSJ2JT3BlbkFJLErA2aZIdCG4TCMHI7Ce'
+                    },
+                    body: JSON.stringify({
+                        model: 'text-davinci-003',  // اختر النموذج المناسب
+                        prompt: question,
+                        max_tokens: 50
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.choices && data.choices.length > 0) {
+                    responseDiv.innerHTML = data.choices[0].text;
+                } else {
+                    responseDiv.innerHTML = 'لم يتم العثور على إجابة مناسبة.';
+                }
+            } catch (error) {
+                responseDiv.innerHTML = 'حدث خطأ أثناء الحصول على الإجابة.';
+                console.error('Error:', error);
+            }
+        }
+    </script>
+</body>
+</html>
